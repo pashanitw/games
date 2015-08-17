@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Phaser - Making your first game, part 2</title>
+    <script type="text/javascript" src="js/phaser.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+    var arr = ["abdul", "kalam", "the", "missile", "man", "died", "missile", "man", "died"];
+    var labels;
+    var sampleText;
+    var canvasWidth = 800;
+    var canvasHeight = 600;
+    var balls;
+    var selectedSprite;
+    var game = new Phaser.Game(canvasWidth, canvasHeight, Phaser.AUTO, '', {
+        preload: preload,
+        create: create,
+        update: update
+    });
+
+    function preload() {
+        game.load.image('sky', 'assets/sky.png');
+        game.load.image('football', 'assets/football.png');
+        game.load.image('ground', 'assets/platform.png');
+        game.load.image('star', 'assets/star.png');
+        game.load.image('button', 'assets/button.png');
+        game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
+
+    }
+
+    function create() {
+        /*testing flip text*/
+
+
+        game.physics.startSystem(Phaser.Physics.ARCADE);
+        game.add.sprite(0, 0, 'sky');
+        stars = game.add.group();
+        stars.enableBody = true;
+        myStar = stars.create(200, 200, 'star');
+        myStar.body.velocity.x = 50;
+        labels = game.add.group();
+        labels.enableBody = true;
+        var xPos = 0, yPos = 0, levelConst = 0;
+        var k = 0;
+
+        arr.forEach(function (key, index) {
+            if (index % 3 == 0) {
+                xPos = 0;
+                yPos += 100;
+                k++;
+            }
+            if (k % 2 == 0) {
+                levelConst = -50;
+            } else {
+                levelConst = 0
+            }
+            var sprite = labels.create(xPos * 300 + levelConst, yPos, 'button');
+            sprite.anchor.set(0.5);
+            var text = game.add.text(0, 0, key, {font: "20px Arial", fill: '#fff', wordWrap: true, wordWrapWidth: 200});
+            text.anchor.set(0.5);
+            sprite.childTag = text;
+            sprite.inputEnabled = true;
+            sprite.events.onInputDown.add(onAnswerChoose, this);
+            sprite.body.velocity.x = 50;
+            xPos++;
+        });
+
+        /*add the football player*/
+        balls = game.add.group();
+        balls.enableBody = true;
+        balls.createMultiple(50, 'football');
+        //  setPlayer();
+    }
+    function setPlayer() {
+        var player;
+        player = balls.getFirstDead();
+        player.reset(game.world.width - 64, game.world.height - 64);
+        player.anchor.set(0.5);
+        player.body.collideWorldBounds = true;
+        player.body.gravity.y = 0;
+        return player;
+    }
+    function onAnswerChoose(sprite, pointer) {
+        var player = setPlayer();
+        selectedSprite = sprite;
+        var spriteMidPoint = {};
+        spriteMidPoint.x = Math.floor(sprite.x + 100);
+        spriteMidPoint.y = Math.floor(sprite.y);
+
+
+        var midpointX = (spriteMidPoint.x + canvasWidth) / 2;
+        var tween = game.add.tween(player)
+                .to({
+                    angle: 1000,
+                    x: [canvasWidth, midpointX, spriteMidPoint.x, spriteMidPoint.x],
+                    y: [canvasHeight, 0, spriteMidPoint.y, spriteMidPoint.y]
+                }, 2000, "Sine.easeOut", true);
+        tween.interpolation(Phaser.Math.bezierInterpolation);
+        game.add.tween(player.scale).to({
+            x: 1.5,
+            y: 1.5
+        }, 500, Phaser.Easing.Linear.None, true).onComplete.add(function () {
+                    game.add.tween(player.scale).to({x: 1, y: 1}, 500, Phaser.Easing.Linear.None, true);
+                }, this);
+
+        // game.add.tween( player.scale ).to( { y: 1,x:1 }, 500 );
+        tween.onComplete.add(function () {
+            game.add.tween(selectedSprite.scale).to( {y:selectedSprite.scale.y*-1 , repeat:-1}, 200, Phaser.Easing.Linear.None, true).loop(true);
+            game.add.tween(selectedSprite.childTag.scale).to( {y:selectedSprite.scale.y*-1 }, 200, Phaser.Easing.Linear.None, true).loop(true);
+            /*var node=document.createElement('embed');
+             node.setAttribute("type","image/svg+xml");
+             node.setAttribute("src","1.svg");
+             node.style.position="absolute";
+             node.style.top=0;
+             document.getElementsByTagName('body')[0].appendChild(node)*/
+            player.kill();
+            //   sprite.kill();
+        }, this)
+    }
+
+    function update() {
+        labels.forEach(wrapLabel);
+        game.physics.arcade.overlap(balls, labels, function (player, sprite) {
+            if (selectedSprite == sprite) {
+                var angle = 500 * (Math.PI / 180);
+                console.log(angle);
+
+            }
+
+        }, null, this);
+        if (game.input.activePointer.isDown) {
+            fire();
+        }
+    }
+    function fire() {
+    }
+    function wrapLabel(label) {
+        //  console.log(label);
+        label.childTag.x = Math.floor(label.x);
+        label.childTag.y = Math.floor(label.y);
+        if (label.body.velocity.x > 0 && label.x >= 800+label.width/2) {
+            console.log(label);
+            label.x = -(label.width);
+        }
+    }
+
+</script>
+
+</body>
+</html>

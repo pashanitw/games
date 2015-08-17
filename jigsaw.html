@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Phaser - Making your first game, part 2</title>
+    <script type="text/javascript" src="js/phaser.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+    var canvasWidth = 600;
+    var canvasHeight = 600;
+
+    var game = new Phaser.Game(canvasWidth, canvasHeight, Phaser.AUTO, '', {
+        preload: preload,
+        create: create,
+        update: update
+    });
+    var sprite;
+    var rectWidth=200;
+    var excess=50;
+    function preload() {
+        game.load.image('mainImg', 'assets/puzzle.jpg');
+    }
+
+    function create() {
+        sprite = game.add.sprite(0, 0, 'mainImg');
+        var mask=game.add.graphics(0,0);
+
+        mask.beginFill(0xffffff);
+        mask.lineTo(200,0);
+        mask.lineTo(200,50);
+        mask.bezierCurveTo(200,100,250,0,250,100);
+        mask.bezierCurveTo(250,200,200,100,200,150);
+        mask.lineTo(200,200);
+        mask.lineTo(0,200);
+        mask.lineTo(0,0);
+        sprite.mask=mask;
+    }
+
+    function update() {
+
+    }
+    function fire() {
+
+    }
+
+</script>
+
+</body>
+</html>
