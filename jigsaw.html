@@ -23,25 +23,221 @@
         update: update
     });
     var sprite;
-    var rectWidth=200;
-    var excess=50;
+    var rectWidth = 200;
+    var excess = 50;
     function preload() {
         game.load.image('mainImg', 'assets/puzzle.jpg');
     }
 
     function create() {
-        sprite = game.add.sprite(0, 0, 'mainImg');
-        var mask=game.add.graphics(0,0);
+        createPath(4);
+    }
+    function createPath(pieces) {
+        var sideLength = canvasWidth / pieces;
+        var irregularExcess = sideLength / 4;
+        var points = [];
+        var randomGenerator = generateRandom(0, 2);
+        var offset = new Phaser.Point(0, 0);
+        for (var i = 0; i < pieces; i++) {
+            for (var j = 0; j < pieces; j++) {
+                var pointCollection = {
+                    topLeft: new Phaser.Point(offset.x, offset.y),
+                    topRight: Phaser.Point.add(offset, new Phaser.Point(sideLength, 0)),
+                    bottomRight: Phaser.Point.add(offset, new Phaser.Point(sideLength, sideLength)),
+                    bottomLeft: Phaser.Point.add(offset, new Phaser.Point(0, sideLength)),
+                    topLeftExcess: '',
+                    topRightExcess: '',
+                    bottomRightExcess: '',
+                    bottomLeftExcess: '',
+                    top_bezier_1: null,
+                    top_bezier_2: null,
+                    top_bezier_1_control_1: null,
+                    top_bezier_1_control_2: null,
+                    top_bezier_2_control_1: null,
+                    top_bezier_2_control_2: null,
+                    top_bezier_peak: null,
+                    right_bezier_1: null,
+                    right_bezier_2: null,
+                    right_bezier_1_control_1: null,
+                    right_bezier_1_control_2: null,
+                    right_bezier_2_control_1: null,
+                    right_bezier_2_control_2: null,
+                    right_bezier_peak: null,
+                    bottom_bezier_1: null,
+                    bottom_bezier_2: null,
+                    bottom_bezier_1_control_1: null,
+                    bottom_bezier_1_control_2: null,
+                    bottom_bezier_2_control_1: null,
+                    bottom_bezier_2_control_2: null,
+                    bottom_bezier_peak: null,
+                    left_bezier_1: null,
+                    left_bezier_2: null,
+                    left_bezier_1_control_1: null,
+                    left_bezier_1_control_2: null,
+                    left_bezier_2_control_1: null,
+                    left_bezier_2_control_2: null,
+                    left_bezier_peak: null,
+                    top: randomGenerator(),
+                    bottom: randomGenerator(),
+                    right: randomGenerator(),
+                    left: randomGenerator()
+                };
+                pointCollection.topLeftExcess = Phaser.Point.subtract(pointCollection.topLeft, new Phaser.Point(irregularExcess, irregularExcess));
+                pointCollection.topRightExcess = Phaser.Point.subtract(pointCollection.topRight, new Phaser.Point(-irregularExcess, irregularExcess));
+                pointCollection.bottomRightExcess = Phaser.Point.add(pointCollection.bottomRight, new Phaser.Point(irregularExcess, irregularExcess));
+                pointCollection.bottomLeftExcess = Phaser.Point.add(pointCollection.bottomLeft, new Phaser.Point(-irregularExcess, irregularExcess));
+                points.push(pointCollection);
+                offset.x += sideLength;
+                if (offset.x >= canvasWidth) {
+                    offset.x = 0;
+                    offset.y += sideLength;
+                }
+            }
 
-        mask.beginFill(0xffffff);
-        mask.lineTo(200,0);
-        mask.lineTo(200,50);
-        mask.bezierCurveTo(200,100,250,0,250,100);
-        mask.bezierCurveTo(250,200,200,100,200,150);
-        mask.lineTo(200,200);
-        mask.lineTo(0,200);
-        mask.lineTo(0,0);
-        sprite.mask=mask;
+        }
+        justifyHeapPositions(points, pieces,canvasWidth,canvasHeight);
+        computeBezierPoints(points, sideLength, irregularExcess);
+        drawPaths(points)
+    }
+    function computeBezierPoints(points, sideLength, irregularExcess) {
+        var bezier1Delta = sideLength / 3;
+        var bezier2Delta = sideLength / 3;
+        points.forEach(function (pointCollection, index) {
+
+            if (!!pointCollection.top) {
+                console.log(index,pointCollection.top)
+                console.log(new Phaser.Point(pointCollection.topLeft.x + bezier1Delta, pointCollection.topLeft.y))
+                pointCollection.top_bezier_1 = new Phaser.Point(pointCollection.topLeft.x + bezier1Delta, pointCollection.topLeft.y);
+                pointCollection.top_bezier_2 = new Phaser.Point(pointCollection.topLeft.x + bezier2Delta, pointCollection.topLeft.y);
+                pointCollection.top_bezier_1_control_1 = Phaser.Point.add(pointCollection.top_bezier_1, new Phaser.Point(irregularExcess, 0));
+                pointCollection.top_bezier_2_control_2 = Phaser.Point.subtract(pointCollection.top_bezier_2, new Phaser.Point(irregularExcess, 0));
+
+                pointCollection.top_bezier_peak = Phaser.Point.centroid([pointCollection.topLeft, pointCollection.topRight]);
+                pointCollection.top_bezier_1_control_2 = pointCollection.topLeft;
+                pointCollection.top_bezier_2_control_1 = pointCollection.topRight;
+                pointCollection.top_bezier_peak = pointCollection.top == 1 ? Phaser.Point.subtract(pointCollection.top_bezier_peak, (0, irregularExcess))
+                        : Phaser.Point.add(pointCollection.top_bezier_peak, (0, irregularExcess));
+            }
+            if (!!pointCollection.bottom) {
+                pointCollection.bottom_bezier_1 =new Phaser.Point(pointCollection.bottomRight.x - bezier1Delta, pointCollection.bottomRight.y);
+                pointCollection.bottom_bezier_2 =  new Phaser.Point(pointCollection.bottomRight.x - bezier2Delta, pointCollection.bottomRight.y);
+                pointCollection.bottom_bezier_1_control_1 = Phaser.Point.subtract(pointCollection.bottom_bezier_1, new Phaser.Point(irregularExcess, 0));
+                pointCollection.bottom_bezier_2_control_2 = Phaser.Point.add(pointCollection.bottom_bezier_2, new Phaser.Point(irregularExcess, 0));
+
+                pointCollection.bottom_bezier_peak = Phaser.Point.centroid([pointCollection.bottomRight, pointCollection.bottomLeft]);
+                pointCollection.bottom_bezier_1_control_2 = pointCollection.bottomRight;
+                pointCollection.bottom_bezier_2_control_1 = pointCollection.bottomLeft;
+                pointCollection.bottom_bezier_peak = pointCollection.bottom == 1 ? Phaser.Point.add(pointCollection.bottom_bezier_peak, (0, irregularExcess))
+                        : Phaser.Point.subtract(pointCollection.bottom_bezier_peak, (0, irregularExcess))
+            }
+
+            if(!!pointCollection.right){
+                pointCollection.right_bezier_1 =new Phaser.Point(pointCollection.bottomRight.x, pointCollection.bottomRight.y-bezier1Delta);
+                pointCollection.right_bezier_2 =  new Phaser.Point(pointCollection.bottomRight.x, pointCollection.bottomRight.y- bezier2Delta);
+                pointCollection.right_bezier_1_control_1 = Phaser.Point.add(pointCollection.right_bezier_1, new Phaser.Point(0, irregularExcess));
+                pointCollection.right_bezier_2_control_2 = Phaser.Point.subtract(pointCollection.right_bezier_2, new Phaser.Point(0,irregularExcess));
+
+                pointCollection.right_bezier_peak = Phaser.Point.centroid([pointCollection.topRight, pointCollection.bottomRight]);
+                pointCollection.right_bezier_1_control_2 = pointCollection.topLeft;
+                pointCollection.right_bezier_2_control_1 = pointCollection.bottomRight;
+                pointCollection.right_bezier_peak = pointCollection.right == 1 ? Phaser.Point.add(pointCollection.right_bezier_peak, (irregularExcess,0))
+                        : Phaser.Point.subtract(pointCollection.right_bezier_peak, (irregularExcess,0));
+            }
+            if(!!pointCollection.left){
+                pointCollection.left_bezier_1 =  new Phaser.Point(pointCollection.bottomLeft.x, pointCollection.bottomLeft.y- bezier1Delta);
+                pointCollection.left_bezier_2 =new Phaser.Point(pointCollection.bottomLeft.x, pointCollection.bottomLeft.y-bezier2Delta);
+                pointCollection.left_bezier_1_control_1 = Phaser.Point.subtract(pointCollection.left_bezier_1, new Phaser.Point(0, irregularExcess));
+                pointCollection.left_bezier_2_control_2 = Phaser.Point.add(pointCollection.left_bezier_2, new Phaser.Point(0, irregularExcess));
+
+                pointCollection.left_bezier_peak = Phaser.Point.centroid([pointCollection.bottomLeft, pointCollection.topLeft]);
+                pointCollection.left_bezier_1_control_2 = pointCollection.bottomLeft;
+                pointCollection.left_bezier_2_control_1 = pointCollection.topLeft;
+                pointCollection.left_bezier_peak = pointCollection.left == 1 ? Phaser.Point.subtract(pointCollection.left_bezier_peak, (irregularExcess,0))
+                        : Phaser.Point.add(pointCollection.left_bezier_peak, (irregularExcess,0));
+            }
+
+
+        });
+    }
+    function drawPaths(points) {
+
+        points.forEach(function (pointCollection, index) {
+            if(index!=4){
+                return;
+
+            }
+            if(index==1){
+                console.log("2nd point",pointCollection)
+            }
+             var sprite=game.add.sprite(0,0,'mainImg');
+            var mask=game.add.graphics(pointCollection.topLeft.x,pointCollection.topLeft.y);
+            mask.beginFill(0xffffff);
+            if(!!pointCollection.top){
+                console.log("curvedrawn");
+                mask.lineTo(pointCollection.top_bezier_1.x,pointCollection.top_bezier_1.y);
+                mask.bezierCurveTo(pointCollection.top_bezier_1_control_1.x,pointCollection.top_bezier_1_control_1.y,
+                        pointCollection.top_bezier_1_control_2.x,pointCollection.top_bezier_1_control_2.y,
+                      pointCollection.top_bezier_peak.x,pointCollection.top_bezier_peak.y);
+                mask.bezierCurveTo(pointCollection.top_bezier_2_control_1.x,pointCollection.top_bezier_2_control_1.y,
+                        pointCollection.top_bezier_2_control_2.x,pointCollection.top_bezier_2_control_2.y,
+                        pointCollection.top_bezier_2.x,pointCollection.top_bezier_2.y);
+            }
+            mask.lineTo(pointCollection.topRight.x,pointCollection.topRight.y);
+            mask.lineTo(pointCollection.bottomRight.x,pointCollection.bottomRight.y);
+            mask.lineTo(pointCollection.bottomLeft.x,pointCollection.bottomLeft.y);
+            mask.lineTo(pointCollection.topLeft.x,pointCollection.topLeft.y);
+            sprite.mask=mask;
+            mask.endFill();
+
+        });
+
+    }
+    function justifyHeapPositions(points, pieces,canvasWidth,canvasHeight) {
+
+        for (var i = 0; i < points.length; i++) {
+            var top = 1, left = 1;
+            var point = points[i];
+
+            if (i < pieces) {
+                top = null;
+                points[i].top=0;
+            }
+            if(points[i].x>=canvasWidth){
+                points[i].right=0;
+            }
+            if(points[i].y>=canvasHeight){
+                points[i].bottom=0;
+            }
+            if (i % pieces == 0) {
+                left = null;
+                points[i].left=0;
+            }
+            if (top !== null) {
+                top = points[i % pieces];
+                var addition = point.top + top.bottom;
+                if (addition != 0) {
+                    point.top += -addition;
+                }
+
+            }
+            if (left !== null) {
+                left = points[i - 1];
+                var addition = point.left + left.right;
+                if (addition != 0) {
+                    point.left += -addition;
+                }
+            }
+
+        }
+        console.log(points);
+    }
+    function generateRandom(min, max) {
+        var heap = [0, 1, -1];
+        var randomGen = new Phaser.RandomDataGenerator();
+        return function () {
+            return heap[randomGen.between(min, max)];
+        }
+
     }
 
     function update() {
