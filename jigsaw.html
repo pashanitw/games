@@ -101,22 +101,23 @@
     }
     function computeBezierPoints(points, sideLength, irregularExcess) {
         var bezier1Delta = sideLength / 3;
-        var bezier2Delta = sideLength / 3;
+        var bezier2Delta =2*sideLength / 3;
         points.forEach(function (pointCollection, index) {
 
             if (!!pointCollection.top) {
-                console.log(index,pointCollection.top)
-                console.log(new Phaser.Point(pointCollection.topLeft.x + bezier1Delta, pointCollection.topLeft.y))
                 pointCollection.top_bezier_1 = new Phaser.Point(pointCollection.topLeft.x + bezier1Delta, pointCollection.topLeft.y);
                 pointCollection.top_bezier_2 = new Phaser.Point(pointCollection.topLeft.x + bezier2Delta, pointCollection.topLeft.y);
                 pointCollection.top_bezier_1_control_1 = Phaser.Point.add(pointCollection.top_bezier_1, new Phaser.Point(irregularExcess, 0));
                 pointCollection.top_bezier_2_control_2 = Phaser.Point.subtract(pointCollection.top_bezier_2, new Phaser.Point(irregularExcess, 0));
 
                 pointCollection.top_bezier_peak = Phaser.Point.centroid([pointCollection.topLeft, pointCollection.topRight]);
-                pointCollection.top_bezier_1_control_2 = pointCollection.topLeft;
-                pointCollection.top_bezier_2_control_1 = pointCollection.topRight;
-                pointCollection.top_bezier_peak = pointCollection.top == 1 ? Phaser.Point.subtract(pointCollection.top_bezier_peak, (0, irregularExcess))
-                        : Phaser.Point.add(pointCollection.top_bezier_peak, (0, irregularExcess));
+                console.log("centroid is",pointCollection.top_bezier_peak);
+                pointCollection.top_bezier_1_control_2 =pointCollection.top == 1? pointCollection.topLeftExcess
+                :Phaser.Point.add(pointCollection.topLeft,new Phaser.Point(0,irregularExcess));
+                pointCollection.top_bezier_2_control_1 = pointCollection.top == 1?pointCollection.topRightExcess
+                        :Phaser.Point.add(pointCollection.topRight,new Phaser.Point(0,irregularExcess));
+                pointCollection.top_bezier_peak = pointCollection.top == 1 ? Phaser.Point.subtract(pointCollection.top_bezier_peak,new Phaser.Point(0, irregularExcess))
+                        : Phaser.Point.add(pointCollection.top_bezier_peak, new Phaser.Point(0, irregularExcess));
             }
             if (!!pointCollection.bottom) {
                 pointCollection.bottom_bezier_1 =new Phaser.Point(pointCollection.bottomRight.x - bezier1Delta, pointCollection.bottomRight.y);
@@ -125,23 +126,27 @@
                 pointCollection.bottom_bezier_2_control_2 = Phaser.Point.add(pointCollection.bottom_bezier_2, new Phaser.Point(irregularExcess, 0));
 
                 pointCollection.bottom_bezier_peak = Phaser.Point.centroid([pointCollection.bottomRight, pointCollection.bottomLeft]);
-                pointCollection.bottom_bezier_1_control_2 = pointCollection.bottomRight;
-                pointCollection.bottom_bezier_2_control_1 = pointCollection.bottomLeft;
-                pointCollection.bottom_bezier_peak = pointCollection.bottom == 1 ? Phaser.Point.add(pointCollection.bottom_bezier_peak, (0, irregularExcess))
-                        : Phaser.Point.subtract(pointCollection.bottom_bezier_peak, (0, irregularExcess))
+                pointCollection.bottom_bezier_1_control_2 =pointCollection.bottom==1? pointCollection.bottomRightExcess
+                :Phaser.Point.subtract(pointCollection.bottomRight,new Phaser.Point(0,irregularExcess));
+                pointCollection.bottom_bezier_2_control_1 =pointCollection.bottom==1 ? pointCollection.bottomLeftExcess
+                :Phaser.Point.subtract(pointCollection.bottomLeft,new Phaser.Point(0,irregularExcess));
+                pointCollection.bottom_bezier_peak = pointCollection.bottom == 1 ? Phaser.Point.add(pointCollection.bottom_bezier_peak, new Phaser.Point(0, irregularExcess))
+                        : Phaser.Point.subtract(pointCollection.bottom_bezier_peak, new Phaser.Point(0, irregularExcess))
             }
 
             if(!!pointCollection.right){
-                pointCollection.right_bezier_1 =new Phaser.Point(pointCollection.bottomRight.x, pointCollection.bottomRight.y-bezier1Delta);
-                pointCollection.right_bezier_2 =  new Phaser.Point(pointCollection.bottomRight.x, pointCollection.bottomRight.y- bezier2Delta);
+                pointCollection.right_bezier_1 =new Phaser.Point(pointCollection.bottomRight.x, pointCollection.bottomRight.y- bezier2Delta);
+                pointCollection.right_bezier_2 = new Phaser.Point(pointCollection.bottomRight.x, pointCollection.bottomRight.y-bezier1Delta);
                 pointCollection.right_bezier_1_control_1 = Phaser.Point.add(pointCollection.right_bezier_1, new Phaser.Point(0, irregularExcess));
                 pointCollection.right_bezier_2_control_2 = Phaser.Point.subtract(pointCollection.right_bezier_2, new Phaser.Point(0,irregularExcess));
 
                 pointCollection.right_bezier_peak = Phaser.Point.centroid([pointCollection.topRight, pointCollection.bottomRight]);
-                pointCollection.right_bezier_1_control_2 = pointCollection.topLeft;
-                pointCollection.right_bezier_2_control_1 = pointCollection.bottomRight;
-                pointCollection.right_bezier_peak = pointCollection.right == 1 ? Phaser.Point.add(pointCollection.right_bezier_peak, (irregularExcess,0))
-                        : Phaser.Point.subtract(pointCollection.right_bezier_peak, (irregularExcess,0));
+                pointCollection.right_bezier_1_control_2 =pointCollection.right==1? pointCollection.topRightExcess
+                :Phaser.Point.subtract(pointCollection.topRight,new Phaser.Point(irregularExcess,0));
+                pointCollection.right_bezier_2_control_1 =pointCollection.right==1? pointCollection.bottomRightExcess
+                :Phaser.Point.subtract(pointCollection.bottomRight,new Phaser.Point(irregularExcess,0));
+                pointCollection.right_bezier_peak = pointCollection.right == 1 ? Phaser.Point.add(pointCollection.right_bezier_peak,new Phaser.Point(irregularExcess,0))
+                        : Phaser.Point.subtract(pointCollection.right_bezier_peak, new Phaser.Point(irregularExcess,0));
             }
             if(!!pointCollection.left){
                 pointCollection.left_bezier_1 =  new Phaser.Point(pointCollection.bottomLeft.x, pointCollection.bottomLeft.y- bezier1Delta);
@@ -150,10 +155,12 @@
                 pointCollection.left_bezier_2_control_2 = Phaser.Point.add(pointCollection.left_bezier_2, new Phaser.Point(0, irregularExcess));
 
                 pointCollection.left_bezier_peak = Phaser.Point.centroid([pointCollection.bottomLeft, pointCollection.topLeft]);
-                pointCollection.left_bezier_1_control_2 = pointCollection.bottomLeft;
-                pointCollection.left_bezier_2_control_1 = pointCollection.topLeft;
-                pointCollection.left_bezier_peak = pointCollection.left == 1 ? Phaser.Point.subtract(pointCollection.left_bezier_peak, (irregularExcess,0))
-                        : Phaser.Point.add(pointCollection.left_bezier_peak, (irregularExcess,0));
+                pointCollection.left_bezier_1_control_2 =pointCollection.left==1? pointCollection.bottomLeftExcess
+                :Phaser.Point.add(pointCollection.bottomLeft,new Phaser.Point(irregularExcess,0));
+                pointCollection.left_bezier_2_control_1 = pointCollection.left==1?pointCollection.topLeftExcess
+                :Phaser.Point.add(pointCollection.topLeft,new Phaser.Point(irregularExcess,0));;
+                pointCollection.left_bezier_peak = pointCollection.left == 1 ? Phaser.Point.subtract(pointCollection.left_bezier_peak,new Phaser.Point(irregularExcess,0))
+                        : Phaser.Point.add(pointCollection.left_bezier_peak,new Phaser.Point(irregularExcess,0));
             }
 
 
@@ -162,18 +169,12 @@
     function drawPaths(points) {
 
         points.forEach(function (pointCollection, index) {
-            if(index!=4){
-                return;
-
-            }
-            if(index==1){
-                console.log("2nd point",pointCollection)
-            }
-             var sprite=game.add.sprite(0,0,'mainImg');
-            var mask=game.add.graphics(pointCollection.topLeft.x,pointCollection.topLeft.y);
+            var sprite=game.add.sprite(0,0,'mainImg');
+            var mask=game.add.graphics(0,0);
+           // mask.lineStyle(4, 0x000000, 1);
+            mask.moveTo(pointCollection.topLeft.x,pointCollection.topLeft.y);
             mask.beginFill(0xffffff);
-            if(!!pointCollection.top){
-                console.log("curvedrawn");
+            if(!!pointCollection.top&&false){
                 mask.lineTo(pointCollection.top_bezier_1.x,pointCollection.top_bezier_1.y);
                 mask.bezierCurveTo(pointCollection.top_bezier_1_control_1.x,pointCollection.top_bezier_1_control_1.y,
                         pointCollection.top_bezier_1_control_2.x,pointCollection.top_bezier_1_control_2.y,
@@ -183,12 +184,49 @@
                         pointCollection.top_bezier_2.x,pointCollection.top_bezier_2.y);
             }
             mask.lineTo(pointCollection.topRight.x,pointCollection.topRight.y);
+            if(!!pointCollection.right&&false){
+                mask.lineTo(pointCollection.right_bezier_1.x,pointCollection.right_bezier_1.y);
+                mask.bezierCurveTo(pointCollection.right_bezier_1_control_1.x,pointCollection.right_bezier_1_control_1.y,
+                        pointCollection.right_bezier_1_control_2.x,pointCollection.right_bezier_1_control_2.y,
+                        pointCollection.right_bezier_peak.x,pointCollection.right_bezier_peak.y);
+                mask.bezierCurveTo(pointCollection.right_bezier_2_control_1.x,pointCollection.right_bezier_2_control_1.y,
+                        pointCollection.right_bezier_2_control_2.x,pointCollection.right_bezier_2_control_2.y,
+                        pointCollection.right_bezier_2.x,pointCollection.right_bezier_2.y);
+            }
             mask.lineTo(pointCollection.bottomRight.x,pointCollection.bottomRight.y);
+
+            if(!!pointCollection.bottom&&false){
+                mask.lineTo(pointCollection.bottom_bezier_1.x,pointCollection.bottom_bezier_1.y);
+                mask.bezierCurveTo(pointCollection.bottom_bezier_1_control_1.x,pointCollection.bottom_bezier_1_control_1.y,
+                        pointCollection.bottom_bezier_1_control_2.x,pointCollection.bottom_bezier_1_control_2.y,
+                        pointCollection.bottom_bezier_peak.x,pointCollection.bottom_bezier_peak.y);
+                mask.bezierCurveTo(pointCollection.bottom_bezier_2_control_1.x,pointCollection.bottom_bezier_2_control_1.y,
+                        pointCollection.bottom_bezier_2_control_2.x,pointCollection.bottom_bezier_2_control_2.y,
+                        pointCollection.bottom_bezier_2.x,pointCollection.bottom_bezier_2.y);
+
+            }
             mask.lineTo(pointCollection.bottomLeft.x,pointCollection.bottomLeft.y);
-            mask.lineTo(pointCollection.topLeft.x,pointCollection.topLeft.y);
+
+            if(!!pointCollection.left){
+                console.log("in left",index,pointCollection.left_bezier_1,
+                        pointCollection.left_bezier_1_control_1,
+                        pointCollection.left_bezier_1_control_2,
+                        pointCollection.left_bezier_peak,
+                        pointCollection.left_bezier_2_control_1,
+                        pointCollection.left_bezier_2_control_2,
+                        pointCollection.left_bezier_2);
+                mask.lineTo(pointCollection.left_bezier_1.x,pointCollection.left_bezier_1.y);
+                mask.bezierCurveTo(pointCollection.left_bezier_1_control_1.x,pointCollection.left_bezier_1_control_1.y,
+                        pointCollection.left_bezier_1_control_2.x,pointCollection.left_bezier_1_control_2.y,
+                        pointCollection.left_bezier_peak.x,pointCollection.left_bezier_peak.y);
+                mask.bezierCurveTo(pointCollection.left_bezier_2_control_1.x,pointCollection.left_bezier_2_control_1.y,
+                        pointCollection.left_bezier_2_control_2.x,pointCollection.left_bezier_2_control_2.y,
+                        pointCollection.left_bezier_2.x,pointCollection.left_bezier_2.y);
+
+            }
+                mask.lineTo(pointCollection.topLeft.x,pointCollection.topLeft.y);
             sprite.mask=mask;
             mask.endFill();
-
         });
 
     }
