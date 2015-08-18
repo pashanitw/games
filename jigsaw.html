@@ -11,7 +11,7 @@
     </style>
 </head>
 <body>
-
+<img src="assets/puzzle.jpg" alt="" width="600" height="600" style="position:absolute;right: 0"/>
 <script type="text/javascript">
 
     var canvasWidth = 600;
@@ -21,7 +21,7 @@
         preload: preload,
         create: create,
         update: update
-    });
+    },true);
     var sprite;
     var rectWidth = 200;
     var excess = 50;
@@ -97,7 +97,7 @@
         }
         justifyHeapPositions(points, pieces,canvasWidth,canvasHeight);
         computeBezierPoints(points, sideLength, irregularExcess);
-        drawPaths(points)
+        drawPaths(points,sideLength,irregularExcess);
     }
     function computeBezierPoints(points, sideLength, irregularExcess) {
         var bezier1Delta = sideLength / 3;
@@ -111,7 +111,6 @@
                 pointCollection.top_bezier_2_control_2 = Phaser.Point.subtract(pointCollection.top_bezier_2, new Phaser.Point(irregularExcess, 0));
 
                 pointCollection.top_bezier_peak = Phaser.Point.centroid([pointCollection.topLeft, pointCollection.topRight]);
-                console.log("centroid is",pointCollection.top_bezier_peak);
                 pointCollection.top_bezier_1_control_2 =pointCollection.top == 1? pointCollection.topLeftExcess
                 :Phaser.Point.add(pointCollection.topLeft,new Phaser.Point(0,irregularExcess));
                 pointCollection.top_bezier_2_control_1 = pointCollection.top == 1?pointCollection.topRightExcess
@@ -166,15 +165,16 @@
 
         });
     }
-    function drawPaths(points) {
-
+    function drawPaths(points,sideLength,irregularExcess) {
+        console.log(points);
+var masks=[],bmps=[];
         points.forEach(function (pointCollection, index) {
-            var sprite=game.add.sprite(0,0,'mainImg');
-            var mask=game.add.graphics(0,0);
+
+            var mask=new Phaser.PIXI.Graphics();
            // mask.lineStyle(4, 0x000000, 1);
             mask.moveTo(pointCollection.topLeft.x,pointCollection.topLeft.y);
             mask.beginFill(0xffffff);
-            if(!!pointCollection.top&&false){
+            if(!!pointCollection.top){
                 mask.lineTo(pointCollection.top_bezier_1.x,pointCollection.top_bezier_1.y);
                 mask.bezierCurveTo(pointCollection.top_bezier_1_control_1.x,pointCollection.top_bezier_1_control_1.y,
                         pointCollection.top_bezier_1_control_2.x,pointCollection.top_bezier_1_control_2.y,
@@ -184,7 +184,7 @@
                         pointCollection.top_bezier_2.x,pointCollection.top_bezier_2.y);
             }
             mask.lineTo(pointCollection.topRight.x,pointCollection.topRight.y);
-            if(!!pointCollection.right&&false){
+            if(!!pointCollection.right){
                 mask.lineTo(pointCollection.right_bezier_1.x,pointCollection.right_bezier_1.y);
                 mask.bezierCurveTo(pointCollection.right_bezier_1_control_1.x,pointCollection.right_bezier_1_control_1.y,
                         pointCollection.right_bezier_1_control_2.x,pointCollection.right_bezier_1_control_2.y,
@@ -195,7 +195,7 @@
             }
             mask.lineTo(pointCollection.bottomRight.x,pointCollection.bottomRight.y);
 
-            if(!!pointCollection.bottom&&false){
+            if(!!pointCollection.bottom){
                 mask.lineTo(pointCollection.bottom_bezier_1.x,pointCollection.bottom_bezier_1.y);
                 mask.bezierCurveTo(pointCollection.bottom_bezier_1_control_1.x,pointCollection.bottom_bezier_1_control_1.y,
                         pointCollection.bottom_bezier_1_control_2.x,pointCollection.bottom_bezier_1_control_2.y,
@@ -208,13 +208,6 @@
             mask.lineTo(pointCollection.bottomLeft.x,pointCollection.bottomLeft.y);
 
             if(!!pointCollection.left){
-                console.log("in left",index,pointCollection.left_bezier_1,
-                        pointCollection.left_bezier_1_control_1,
-                        pointCollection.left_bezier_1_control_2,
-                        pointCollection.left_bezier_peak,
-                        pointCollection.left_bezier_2_control_1,
-                        pointCollection.left_bezier_2_control_2,
-                        pointCollection.left_bezier_2);
                 mask.lineTo(pointCollection.left_bezier_1.x,pointCollection.left_bezier_1.y);
                 mask.bezierCurveTo(pointCollection.left_bezier_1_control_1.x,pointCollection.left_bezier_1_control_1.y,
                         pointCollection.left_bezier_1_control_2.x,pointCollection.left_bezier_1_control_2.y,
@@ -225,10 +218,70 @@
 
             }
                 mask.lineTo(pointCollection.topLeft.x,pointCollection.topLeft.y);
-            sprite.mask=mask;
-            mask.endFill();
-        });
+            var bmp=game.make.bitmapData(sideLength+2*irregularExcess, sideLength+2*irregularExcess);;
+            var rectangle=new Phaser.Rectangle(pointCollection.topLeftExcess.x,pointCollection.topLeftExcess.y,
+                    sideLength+2*irregularExcess,sideLength+2*irregularExcess);
 
+
+            //game.add.sprite(0,0,sprite);
+            bmp.copyRect("mainImg",rectangle,0,0);
+            bmp.pointCollection=pointCollection;
+            bmp.maskPath=mask;
+            bmps.push(bmp);
+            mask.endFill();
+            masks.push(mask);
+        });
+      game.world.removeAll();
+        /*
+        *  bmps.forEach(function(bmp,index){
+         if(index>12){
+         return;
+         }
+         var point=bmp.pointCollection;
+         var sprite=game.add.sprite(point.topLeftExcess.x,point.topLeftExcess.y,bmp);
+         sprite.isMask=true;
+         sprite.mask=masks[index];
+
+         })*/
+
+        var shuffledPoints=Phaser.ArrayUtils.shuffle(points);
+        var sprites=[];
+        var piecesGroup = game.add.group();
+        bmps.forEach(function(bmp,index){
+            if(index>12){
+                return;
+            }
+            var point=bmp.pointCollection;
+            var sprite=game.add.sprite(point.topLeftExcess.x,point.topLeftExcess.y,bmp);
+            sprite.isMask=true;
+            sprite.mask=masks[index];
+            piece = piecesGroup.create(sideLength+2*irregularExcess, sideLength+2*irregularExcess,
+                    "background", bmp);
+            piece.mask=masks[index];
+
+            piece.x=shuffledPoints[index].topLeftExcess.x;
+            piece.y=shuffledPoints[index].topLeftExcess.y;
+
+        })
+
+    }
+    function shuffle(array) {
+
+        var counter = array.length,
+                temp,
+                index;
+
+        while (counter > 0) {
+            index = Math.floor(Math.random() * counter);
+
+            counter--;
+
+            temp = array[counter];
+            array[counter] = array[index];
+            array[index] = temp;
+        }
+
+        return array;
     }
     function justifyHeapPositions(points, pieces,canvasWidth,canvasHeight) {
 
@@ -240,10 +293,10 @@
                 top = null;
                 points[i].top=0;
             }
-            if(points[i].x>=canvasWidth){
+            if(points[i].topRight.x>=canvasWidth){
                 points[i].right=0;
             }
-            if(points[i].y>=canvasHeight){
+            if(points[i].bottomRight.y>=canvasHeight){
                 points[i].bottom=0;
             }
             if (i % pieces == 0) {
@@ -251,7 +304,10 @@
                 points[i].left=0;
             }
             if (top !== null) {
-                top = points[i % pieces];
+                top = points[i - pieces];
+                if(i==8){
+                    console.log(point.top,top.bottom,i % pieces)
+                }
                 var addition = point.top + top.bottom;
                 if (addition != 0) {
                     point.top += -addition;
@@ -267,7 +323,6 @@
             }
 
         }
-        console.log(points);
     }
     function generateRandom(min, max) {
         var heap = [0, 1, -1];

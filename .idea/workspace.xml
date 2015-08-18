@@ -27,8 +27,8 @@
       <file leaf-file-name="phaser.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/js/phaser.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="844679" max-vertical-offset="1617261">
-              <caret line="49687" column="4" selection-start-line="49687" selection-start-column="4" selection-end-line="49687" selection-end-column="4" />
+            <state vertical-scroll-proportion="-7.96" vertical-offset="880571" max-vertical-offset="1617261">
+              <caret line="51810" column="6" selection-start-line="51810" selection-start-column="6" selection-end-line="51810" selection-end-column="6" />
               <folding />
             </state>
           </provider>
@@ -37,9 +37,11 @@
       <file leaf-file-name="jigsaw.html" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/jigsaw.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.24224806" vertical-offset="2782" max-vertical-offset="5032">
-              <caret line="171" column="54" selection-start-line="171" selection-start-column="54" selection-end-line="171" selection-end-column="54" />
-              <folding />
+            <state vertical-scroll-proportion="0.4728682" vertical-offset="4074" max-vertical-offset="5967">
+              <caret line="254" column="11" selection-start-line="254" selection-start-column="11" selection-end-line="256" selection-end-column="37" />
+              <folding>
+                <element signature="n#style#0;n#img#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -47,8 +49,8 @@
       <file leaf-file-name="football.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/football.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="35.653847" vertical-offset="1080" max-vertical-offset="2771">
-              <caret line="9" column="9" selection-start-line="9" selection-start-column="9" selection-end-line="9" selection-end-column="9" />
+            <state vertical-scroll-proportion="-8.763637" vertical-offset="606" max-vertical-offset="2771">
+              <caret line="64" column="32" selection-start-line="64" selection-start-column="25" selection-end-line="64" selection-end-column="32" />
               <folding />
             </state>
           </provider>
@@ -288,7 +290,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="4386">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="n#style#0;n#img#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -330,7 +334,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="930">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="n#style#0;n#img#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -388,32 +394,34 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/js/phaser.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="844679" max-vertical-offset="1617261">
-          <caret line="49687" column="4" selection-start-line="49687" selection-start-column="4" selection-end-line="49687" selection-end-column="4" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/assets/puzzle.jpg">
       <provider selected="true" editor-type-id="images">
         <state />
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/js/phaser.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-7.96" vertical-offset="880571" max-vertical-offset="1617261">
+          <caret line="51810" column="6" selection-start-line="51810" selection-start-column="6" selection-end-line="51810" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/football.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="35.653847" vertical-offset="1080" max-vertical-offset="2771">
-          <caret line="9" column="9" selection-start-line="9" selection-start-column="9" selection-end-line="9" selection-end-column="9" />
+        <state vertical-scroll-proportion="-8.763637" vertical-offset="606" max-vertical-offset="2771">
+          <caret line="64" column="32" selection-start-line="64" selection-start-column="25" selection-end-line="64" selection-end-column="32" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/jigsaw.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.24224806" vertical-offset="2782" max-vertical-offset="5032">
-          <caret line="171" column="54" selection-start-line="171" selection-start-column="54" selection-end-line="171" selection-end-column="54" />
-          <folding />
+        <state vertical-scroll-proportion="0.4728682" vertical-offset="4074" max-vertical-offset="5967">
+          <caret line="254" column="11" selection-start-line="254" selection-start-column="11" selection-end-line="256" selection-end-column="37" />
+          <folding>
+            <element signature="n#style#0;n#img#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
